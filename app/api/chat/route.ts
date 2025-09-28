@@ -61,6 +61,7 @@ export async function POST(request: Request) {
 
   try {
     if (!activeSandboxId) {
+      logError("Creating new sandbox with E2B API key:", apiKey.substring(0, 10) + "...");
       const newSandbox = await Sandbox.create({
         resolution,
         dpi: 96,
@@ -72,7 +73,9 @@ export async function POST(request: Request) {
       activeSandboxId = newSandbox.sandboxId;
       vncUrl = newSandbox.stream.getUrl();
       desktop = newSandbox;
+      logError("Sandbox created successfully:", activeSandboxId);
     } else {
+      logError("Connecting to existing sandbox:", activeSandboxId);
       desktop = await Sandbox.connect(activeSandboxId);
     }
 
@@ -114,6 +117,11 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     logError("Error connecting to sandbox:", error);
-    return new Response("Failed to connect to sandbox", { status: 500 });
+    // Add more detailed error information
+    if (error instanceof Error) {
+      logError("Error message:", error.message);
+      logError("Error stack:", error.stack);
+    }
+    return new Response("Failed to connect to sandbox: " + (error instanceof Error ? error.message : "Unknown error"), { status: 500 });
   }
 }
