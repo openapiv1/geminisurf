@@ -3,7 +3,7 @@
  */
 import { ResponseComputerToolCall } from "openai/resources/responses/responses.mjs";
 import { ActionEvent, ComputerModel, SSEEventType } from "./api";
-import { ComputerAction } from "@/types/anthropic";
+import { GeminiComputerAction } from "@/lib/streaming/gemini";
 
 /**
  * Role of a chat message
@@ -52,7 +52,9 @@ export interface ActionChatMessage<T extends ComputerModel = ComputerModel>
   role: "action";
   action: T extends "openai"
     ? ResponseComputerToolCall["action"]
-    : ComputerAction;
+    : T extends "gemini"
+    ? GeminiComputerAction
+    : any; // fallback for any other model types
   status?: "pending" | "completed" | "failed";
   model: ComputerModel;
 }
